@@ -26,7 +26,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    // Konfiguracja JWT Bearer w Swaggerze
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -108,8 +107,8 @@ using (var scope = app.Services.CreateScope())
 
     RecurringJob.AddOrUpdate(
         "task-reminder-job",
-        () => taskReminderService.CheckTasksAndSendReminders(),  // Poprawne wywołanie metody
-        "* * * * *"
+        () => taskReminderService.CheckTasksAndSendReminders(),
+        "*/5 * * * *"
     );
 }
 
