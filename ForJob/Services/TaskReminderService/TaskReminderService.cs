@@ -8,14 +8,12 @@ namespace ForJob.Services.TaskReminderService
     public class TaskReminderService
     {
         private readonly IEmailService _emailService;
-        private readonly IHttpClientFactory _httpClientFactory;
         private readonly DatabaseContext _context;
 
         public TaskReminderService(IEmailService emailService, IHttpClientFactory httpClientFactory, DatabaseContext context)
         {
             _context = context;
             _emailService = emailService;
-            _httpClientFactory = httpClientFactory;
         }
 
         public async System.Threading.Tasks.Task CheckTasksAndSendReminders()
