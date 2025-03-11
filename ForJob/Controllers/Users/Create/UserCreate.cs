@@ -1,0 +1,64 @@
+﻿using ForJob.DbContext;
+using ForJob.Library;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
+using System.Security.Cryptography;
+
+namespace ForJob.Controllers.Users.Create
+{
+    [AllowAnonymous]
+    [Route("api/user")]
+    [ApiController]
+    public class UserCreate : ControllerBase
+    {
+        private readonly DatabaseContext _context;
+
+        public UserCreate(DatabaseContext context)
+        {
+            _context = context;
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Post(UserCreateRequest req)
+        {
+            if(req.Password == null)
+            {
+                return BadRequest("No password provided");
+            }
+            if(req.Name == null)
+            {
+                return BadRequest("No name provided");
+            }
+            if(req.Password == null)
+            {
+                return BadRequest("No password provided");
+            }
+
+            CreatePassHash(req.Password, out byte[] passwordHash, out byte[] passwordSalt);
+
+            var user = new User
+            {
+                Name = req.Name,
+                Role = req.Role,
+                Hash = passwordHash,
+                Salt = passwordSalt
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(user);
+        }
+
+        private void CreatePassHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            }
+        }
+    }
+}
