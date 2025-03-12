@@ -1,4 +1,5 @@
-﻿using ForJob.DbContext;
+﻿using FluentValidation;
+using ForJob.DbContext;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,31 +11,24 @@ namespace ForJob.Controllers.Tasks.Put
     [Authorize(Roles = "User")]
     public class TaskPut : ControllerBase
     {
-        public DatabaseContext _context;
+        private readonly DatabaseContext _context;
+        private readonly IValidator<TaskPutRequest> _taskValidator;
 
-        public TaskPut(DatabaseContext context)
+
+        public TaskPut(DatabaseContext context, IValidator<TaskPutRequest> taskValidator)
         {
             _context = context;
+            _taskValidator = taskValidator;
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, TaskPutRequest req)
         {
-            if (req == null)
+            var validationResult = await _taskValidator.ValidateAsync(req);
+
+            if (!validationResult.IsValid)
             {
-                return BadRequest("No body provided");
-            }
-            if (req.DueDate == null)
-            {
-                return BadRequest("No due date provided");
-            }
-            if (req.Description == null)
-            {
-                return BadRequest("Description not provided");
-            }
-            if (req.Title == null)
-            {
-                return BadRequest("Title not provided");
+                return BadRequest(validationResult.Errors);
             }
 
             var task = _context.Tasks.Where(x => x.Id == id).FirstOrDefault();

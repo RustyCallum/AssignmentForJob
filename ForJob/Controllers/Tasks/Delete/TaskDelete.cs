@@ -12,10 +12,12 @@ namespace ForJob.Controllers.Tasks.Delete
     public class TaskDelete : ControllerBase
     {
         private readonly DatabaseContext _context;
+        private readonly ILogger<TaskDelete> _logger;
 
-        public TaskDelete(DatabaseContext context)
+        public TaskDelete(DatabaseContext context, ILogger<TaskDelete> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [HttpDelete("{id}")]
@@ -25,13 +27,16 @@ namespace ForJob.Controllers.Tasks.Delete
 
             if(task == null)
             {
+                _logger.LogInformation($"Task with id {id} could not be found");
                 return NotFound();
             }
 
             task.IsDeleted = true;
             await _context.SaveChangesAsync();
 
-            return Ok($"Task {id} marked as deleted sucessfully");
+            _logger.LogInformation($"Task with id {id} marked as deleted");
+
+            return NoContent();
         }
     }
 }

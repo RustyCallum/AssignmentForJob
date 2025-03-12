@@ -6,10 +6,12 @@ namespace ForJob.Services.EmailService
     public class EmailService : IEmailService
     {
         private readonly IConfiguration _configuration;
+        private readonly ILogger _logger;
 
         public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task SendEmailAsync(string to, string subject, string body)
@@ -33,11 +35,11 @@ namespace ForJob.Services.EmailService
                 await smtp.SendAsync(email);
                 await smtp.DisconnectAsync(true);
 
-                Console.WriteLine($"E-mail sent to {to}");
+                _logger.LogInformation($"E-mail sent to {to}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error while sending e-mail: {ex.Message}");
+                _logger.LogError($"Error while sending e-mail: {ex.Message}");
             }
         }
     }
