@@ -1,4 +1,5 @@
-﻿using ForJob.DbContext;
+﻿using FluentValidation;
+using ForJob.DbContext;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,30 +12,22 @@ namespace ForJob.Controllers.Tasks.Post
     public class TaskPost : ControllerBase
     {
         private readonly DatabaseContext _context;
+        private readonly IValidator<TaskPostRequest> _taskValidator;
 
-        public TaskPost(DatabaseContext context)
+        public TaskPost(DatabaseContext context, IValidator<TaskPostRequest> taskValidator)
         {
             _context = context;
+            _taskValidator = taskValidator;
         }
 
         [HttpPost]
         public async Task<ActionResult> Post(TaskPostRequest req)
         {
-            if (req == null)
+            var validationResult = await _taskValidator.ValidateAsync(req);
+
+            if (!validationResult.IsValid)
             {
-                return BadRequest("No body provided");
-            }
-            if (req.DueDate == null)
-            {
-                return BadRequest("No due date provided");
-            }
-            if (req.Description == null)
-            {
-                return BadRequest("Description not provided");
-            }
-            if (req.Title == null)
-            {
-                return BadRequest("Title not provided");
+                return BadRequest(validationResult.Errors);
             }
 
             var newTask = new Library.Task
@@ -48,7 +41,7 @@ namespace ForJob.Controllers.Tasks.Post
             _context.Tasks.Add(newTask);
             await _context.SaveChangesAsync();
 
-            return Ok(newTask);
+            return Created();
         }
     }
 }

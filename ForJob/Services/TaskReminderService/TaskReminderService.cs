@@ -9,11 +9,15 @@ namespace ForJob.Services.TaskReminderService
     {
         private readonly IEmailService _emailService;
         private readonly DatabaseContext _context;
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<TaskReminderService> _logger;
 
-        public TaskReminderService(IEmailService emailService, IHttpClientFactory httpClientFactory, DatabaseContext context)
+        public TaskReminderService(IEmailService emailService, IHttpClientFactory httpClientFactory, DatabaseContext context, IConfiguration configuration, ILogger<TaskReminderService> logger)
         {
             _context = context;
             _emailService = emailService;
+            _configuration = configuration;
+            _logger = logger;
         }
 
         public async System.Threading.Tasks.Task CheckTasksAndSendReminders()
@@ -23,13 +27,20 @@ namespace ForJob.Services.TaskReminderService
                 .Where(t => t.DueDate <= now.AddHours(6) && t.DueDate >= now)
                 .ToListAsync();
 
+            string recipientEmail = _configuration["RecipentEmail"];
+
+            if (recipientEmail == null)
+            {
+                throw new Exception("Recipent email not provided");
+            }
+
             foreach (var task in tasks)
             {
-                string emailBody = $"Reminder: Task '{task.Title}' is due in {task.DueDate}!";
-                Console.WriteLine($"Sending reminder for task: {task.Title}");
+                string emailBody = $"Reminder: Task '{task.Title}' is due to {task.DueDate}!";
+                _logger.LogInformation($"Sending reminder for task: {task.Title}");
 
                 // ENTER YOUR EMAIL HERE
-                await _emailService.SendEmailAsync("YOUREMAILHERE", "Task Reminder", emailBody);
+                await _emailService.SendEmailAsync(recipientEmail, "Task Reminder", emailBody);
             }
         }
     }

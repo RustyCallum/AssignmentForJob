@@ -1,4 +1,5 @@
-﻿using ForJob.DbContext;
+﻿using FluentValidation;
+using ForJob.DbContext;
 using ForJob.Library;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,26 +15,22 @@ namespace ForJob.Controllers.Users.Create
     public class UserCreate : ControllerBase
     {
         private readonly DatabaseContext _context;
+        private readonly IValidator<UserCreateRequest> _userValidator;
 
-        public UserCreate(DatabaseContext context)
+        public UserCreate(DatabaseContext context, IValidator<UserCreateRequest> userValidator)
         {
             _context = context;
+            _userValidator = userValidator;
         }
 
         [HttpPost]
         public async Task<ActionResult> Post(UserCreateRequest req)
         {
-            if(req.Password == null)
+            var validationResult = await _userValidator.ValidateAsync(req);
+
+            if (!validationResult.IsValid)
             {
-                return BadRequest("No password provided");
-            }
-            if(req.Name == null)
-            {
-                return BadRequest("No name provided");
-            }
-            if(req.Password == null)
-            {
-                return BadRequest("No password provided");
+                return BadRequest(validationResult.Errors);
             }
 
             CreatePassHash(req.Password, out byte[] passwordHash, out byte[] passwordSalt);
@@ -49,7 +46,7 @@ namespace ForJob.Controllers.Users.Create
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return Ok(user);
+            return Created();
         }
 
         private void CreatePassHash(string password, out byte[] passwordHash, out byte[] passwordSalt)

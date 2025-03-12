@@ -1,4 +1,5 @@
-﻿using ForJob.DbContext;
+﻿using FluentValidation;
+using ForJob.DbContext;
 using ForJob.Library;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -18,10 +19,12 @@ namespace ForJob.Controllers.Users.Login
     {
         private const string TokenSecretKey = "Aleksander51HaHaXDbekazwasxDxDnienawidzewas";
         private readonly DatabaseContext _context;
+        private readonly IValidator<UserLoginRequest> _loginValidator;
 
-        public UserLogin(DbContext.DatabaseContext context)
+        public UserLogin(DbContext.DatabaseContext context, IValidator<UserLoginRequest> loginValidator)
         {
             _context = context;
+            _loginValidator = loginValidator;
         }
 
         [HttpPost]
@@ -29,9 +32,11 @@ namespace ForJob.Controllers.Users.Login
         {
             Guid g = Guid.NewGuid();
 
-            if (req == null)
+            var validationResult = await _loginValidator.ValidateAsync(req);
+
+            if (!validationResult.IsValid)
             {
-                return BadRequest("No request body");
+                return BadRequest(validationResult.Errors);
             }
 
             var userToCheck = _context.Users.Where(x => x.Name == req.Name).FirstOrDefault();

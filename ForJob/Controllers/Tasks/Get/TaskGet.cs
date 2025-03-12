@@ -12,20 +12,25 @@ namespace ForJob.Controllers.Tasks.Get
     public class TaskGet : ControllerBase
     {
         private readonly DatabaseContext _context;
+        private readonly ILogger<TaskGet> _logger;
 
-        public TaskGet(DatabaseContext context)
+        public TaskGet(DatabaseContext context, ILogger<TaskGet> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<Library.Task>>> GetTasks(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
-            [FromQuery] string? search = null)
+            [FromQuery] string? search = null,
+            [FromQuery] DateTime? from = null,
+            [FromQuery] DateTime? to = null)
         {
             if (page < 1 || pageSize < 1)
             {
+                _logger.LogInformation($"Provided page or pagesize lower than 1");
                 return BadRequest("page and pageSize must be greater than 0");
             }
 
@@ -34,6 +39,16 @@ namespace ForJob.Controllers.Tasks.Get
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(t => t.Title.Contains(search));
+            }
+
+            if (from.HasValue)
+            {
+                query = query.Where(t => t.DueDate >= from.Value);
+            }
+
+            if (to.HasValue)
+            {
+                query = query.Where(t => t.DueDate <= to.Value);
             }
 
             var totalItems = await query.CountAsync();
