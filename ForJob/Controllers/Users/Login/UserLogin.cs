@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using ForJob.DbContext;
-using ForJob.Library;
+using ForJob.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

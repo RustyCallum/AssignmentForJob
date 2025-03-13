@@ -30,7 +30,7 @@ namespace ForJob.Controllers.Tasks.Post
                 return BadRequest(validationResult.Errors);
             }
 
-            var newTask = new Library.Task
+            var newTask = new Domain.Task
             {
                 DueDate = req.DueDate.Value,
                 Description = req.Description,

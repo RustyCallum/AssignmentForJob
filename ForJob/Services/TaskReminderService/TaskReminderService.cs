@@ -1,5 +1,5 @@
 ﻿using ForJob.DbContext;
-using ForJob.Library;
+using ForJob.Domain;
 using ForJob.Services.EmailService;
 using Microsoft.EntityFrameworkCore;
 
