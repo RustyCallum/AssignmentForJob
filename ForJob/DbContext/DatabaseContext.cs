@@ -1,22 +1,22 @@
-﻿using ForJob.Library;
+﻿using ForJob.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace ForJob.DbContext
 {
     public class DatabaseContext : Microsoft.EntityFrameworkCore.DbContext
     {
-        public DbSet<Library.Task> Tasks => Set<Library.Task>();
+        public DbSet<Domain.Task> Tasks => Set<Domain.Task>();
         public DbSet<User> Users => Set<User>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Library.Task>()
+            modelBuilder.Entity<Domain.Task>()
                 .Property(t => t.Id)
                 .ValueGeneratedOnAdd();
 
-            modelBuilder.Entity<Library.Task>().HasQueryFilter(t => !t.IsDeleted);
+            modelBuilder.Entity<Domain.Task>().HasQueryFilter(t => !t.IsDeleted);
 
-            modelBuilder.Entity<Library.User>()
+            modelBuilder.Entity<Domain.User>()
                 .Property(t => t.Id)
                 .ValueGeneratedOnAdd();
         }

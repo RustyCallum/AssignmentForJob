@@ -21,7 +21,7 @@ namespace ForJob.Controllers.Tasks.Get
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Library.Task>>> GetTasks(
+        public async Task<ActionResult<List<Domain.Task>>> GetTasks(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] string? search = null,

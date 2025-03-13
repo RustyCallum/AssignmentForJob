@@ -1,4 +1,4 @@
-﻿namespace ForJob.Library
+﻿namespace ForJob.Domain
 {
     public class User
     {
